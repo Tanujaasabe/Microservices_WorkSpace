@@ -1,0 +1,41 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: RATINGSERVICE
+
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: Microservies
+
+  jackson:
+    serialization:
+      indent-output: true
+
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          mongodb:
+            core:
+              MongoTemplate: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+eureka:
+  instance:
+    prefer-ip-address: true
+
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8084/eureka/

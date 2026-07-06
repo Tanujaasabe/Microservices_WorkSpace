@@ -1,0 +1,67 @@
+package com.userservice.controller;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.userservice.entity.User;
+import com.userservice.service.UserService;
+
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
+    @Autowired
+    private UserService S;
+
+    @GetMapping
+    public String test() {
+        return "User Service Running";
+    }
+
+    @PostMapping("/add")
+    public User saveuser(@RequestBody User user) {
+        return S.saveuser(user);
+    }
+
+    @GetMapping("/getsingleuser/{userId}")
+    @CircuitBreaker(name = "RatingHotelBreaker", fallbackMethod = "ratingHotelFallback")
+    public User getsingleuser(@PathVariable String userId) {
+        return S.getsingleuser(userId);
+    }
+
+    // Fallback Method
+    public User ratingHotelFallback(String userId, Exception ex) {
+
+        logger.info("Fallback executed because service is down: {}", ex.getMessage());
+
+        return User.builder()
+                .userid("142112")
+                .name("Dummy User")
+                .email("tanujaasabe@gmail.com")
+                .about("This user is returned because Rating/Hotel Service is down.")
+                .build();
+    }
+
+    @GetMapping("/getuser")
+    public List<User> getuser() {
+        return S.getuser();
+    }
+
+    @PutMapping("/updateuser/{id}")
+    public User updateuser(@PathVariable String id, @RequestBody User user) {
+        return S.updateuser(id, user);
+    }
+
+    @DeleteMapping("/deleteuser/{id}")
+    public String deleteuser(@PathVariable String id) {
+        return S.deleteuser(id);
+    }
+}
